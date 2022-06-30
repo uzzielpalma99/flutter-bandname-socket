@@ -1,18 +1,15 @@
 import 'dart:io';
 
+import 'package:band_names/pages/add_page.dart';
+import 'package:band_names/providers/add_form_provider.dart';
+import 'package:band_names/widgets/order_data_table.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pie_chart/pie_chart.dart';
 
-import 'package:band_names/models/band.dart';
+import 'package:band_names/models/emprendimiento.dart';
 import 'package:band_names/services/socket_service.dart';
-
-
-
-
-
-
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -23,41 +20,36 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Band> bands = [
-    // Band(id: '1', name: 'Metallica', votes: 5),
-    // Band(id: '2', name: 'Queen', votes: 2),
-    // Band(id: '3', name: 'Heroes del Silencio', votes: 1),
-    // Band(id: '4', name: 'Bon Jovi', votes: 5),
-    ];
 
   @override
   void initState() {
     final socketService =Provider.of<SocketService>(context, listen: false); //Listen en false porque no quiero redibujar nada
     
-    socketService.socket.on('active-bands', _handleActiveBands);
+    // socketService.socket.on('active-bands', _handleActiveBands);
     super.initState();
   }
 
-  _handleActiveBands(dynamic payload) {
-    this.bands = (payload as List)
-    .map((band) => Band
-    .fromMap(band)).toList();
+  // _handleActiveBands(dynamic payload) {
+  //   this.bands = (payload as List)
+  //   .map((band) => Band
+  //   .fromMap(band)).toList();
   
-    setState(() {});
-  }
+  //   setState(() {});
+  // }
 
   @override
   void dispose() {
     final socketService =Provider.of<SocketService>(context, listen: false); //Listen en false porque no quiero redibujar nada
-    socketService.socket.off('active-bands');
+    // socketService.socket.off('active-bands');
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     final socketService =Provider.of<SocketService>(context); 
+     final addFormProvider = Provider.of<AddFormProvider>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BandNames', style: TextStyle(color:Colors.black87)),
+        title: const Text('Emprendimientos', style: TextStyle(color:Colors.black87)),
         backgroundColor: Colors.white, 
         elevation: 1,
         actions: [
@@ -72,51 +64,56 @@ class _HomePageState extends State<HomePage> {
         ),
         body: Column(
           children: [
-            _showGrapg(),
-            Expanded(
-              child: ListView.builder(
-                itemCount: bands.length,
-                itemBuilder: (context, i) =>  _bandTile(bands[i])
-              ),
-            ),
+            // _showGrapg(),
+            OrderDataTable(
+            emprendimientos: addFormProvider.emprendimientos,
+            onSort: (columnIndex, ascending) {
+      
+            }, 
+          ),
           ]
         ),
           floatingActionButton: FloatingActionButton(
             elevation: 1,
-            onPressed: addNewBand,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddPage()),
+              );
+            },
             child: const Icon(Icons.add),
           ),
     );
   }
 
-  Widget _bandTile(Band band) {
-    final socketService =Provider.of<SocketService>(context, listen: false); 
+  // Widget _bandTile(Emprendimiento emprendimiento) {
+  //   final socketService =Provider.of<SocketService>(context, listen: false); 
 
-    return Dismissible(
-      key: Key(band.id!),
-      direction: DismissDirection.startToEnd,
-      onDismissed: ( _ ) => socketService.socket.emit('delete-band', { 'id' : band.id}),
-      background: Container(
-        padding: const EdgeInsets.only(left: 8),
-        color: Colors.red,
-        child: const Align(
-          alignment: Alignment.centerLeft,
-          child: Text('Delete Band', style: TextStyle(color: Colors.white)),
-          ),
-      ),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue[100],
-          child: Text(band.name!.substring(0,2),),
-        ),
-        title: Text(band.name!),
-        trailing: Text('${band.votes}', style: const TextStyle(fontSize:20)),
-        onTap: () => socketService.socket.emit('vote-band', { 'id' : band.id}),
-      ),
-    );
-  }
+  //   return Dismissible(
+  //     key: Key(emprendimiento.id.toString()),
+  //     direction: DismissDirection.startToEnd,
+  //     onDismissed: ( _ ) => socketService.socket.emit('delete-band', { 'id' : emprendimiento.id}),
+  //     background: Container(
+  //       padding: const EdgeInsets.only(left: 8),
+  //       color: Colors.red,
+  //       child: const Align(
+  //         alignment: Alignment.centerLeft,
+  //         child: Text('Delete Band', style: TextStyle(color: Colors.white)),
+  //         ),
+  //     ),
+  //     child: ListTile(
+  //       leading: CircleAvatar(
+  //         backgroundColor: Colors.blue[100],
+  //         child: Text(band.name!.substring(0,2),),
+  //       ),
+  //       title: Text(band.name!),
+  //       trailing: Text('${band.votes}', style: const TextStyle(fontSize:20)),
+  //       onTap: () => socketService.socket.emit('vote-band', { 'id' : band.id}),
+  //     ),
+  //   );
+  // }
 
-  addNewBand() {
+  addNuevoEmprendimiento() {
 
     final textController = new TextEditingController();
 
@@ -174,23 +171,23 @@ class _HomePageState extends State<HomePage> {
 
     Navigator.pop(context);
   }
-  //Mostrar grafica
-  Widget _showGrapg() {
-    Map<String, double> dataMap = {
-      'Fultter' : 0,
-    };
+  // //Mostrar grafica
+  // Widget _showGrapg() {
+  //   Map<String, double> dataMap = {
+  //     'Fultter' : 0,
+  //   };
   
-  bands.forEach((band) { 
-  dataMap.putIfAbsent(band.name!, () => band.votes!.toDouble());
-  });
+  // bands.forEach((band) { 
+  // dataMap.putIfAbsent(band.name!, () => band.votes!.toDouble());
+  // });
   
 
-  return Container(
-    padding: const EdgeInsets.only(top: 10),
-    width: double.infinity,
-    height: 200,
-    child: PieChart(
-      dataMap: dataMap,
-      chartType: ChartType.ring,));
-  }
+  // return Container(
+  //   padding: const EdgeInsets.only(top: 10),
+  //   width: double.infinity,
+  //   height: 200,
+  //   child: PieChart(
+  //     dataMap: dataMap,
+  //     chartType: ChartType.ring,));
+  // }
 }
