@@ -1,5 +1,10 @@
+import 'package:band_names/services/socket_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:band_names/providers/add_form_provider.dart';
 import 'package:band_names/models/emprendimiento.dart';
+
 
 
 
@@ -24,6 +29,8 @@ class _OrderDataTableState extends State<OrderDataTable> {
 
   @override
   Widget build(BuildContext context) {
+    final addFormProvider = Provider.of<AddFormProvider>(context);
+    final socketService = Provider.of<SocketService>(context, listen: false);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -58,7 +65,6 @@ class _OrderDataTableState extends State<OrderDataTable> {
               DataCell(
                 Text(emprendimiento.emprendedor),
                 onTap: () {
-
                 }
               ),
               DataCell(
@@ -67,6 +73,8 @@ class _OrderDataTableState extends State<OrderDataTable> {
               DataCell(
                 const Icon(Icons.delete),
                 onTap: () {
+                  addFormProvider.removerEmprendimiento(emprendimiento.id);
+                  socketService.socket.emit('delete-emprendimiento', { 'id' : emprendimiento.id});
                 },
               ),
             ]);

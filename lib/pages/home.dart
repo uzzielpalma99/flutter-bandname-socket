@@ -6,7 +6,6 @@ import 'package:band_names/widgets/order_data_table.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pie_chart/pie_chart.dart';
 
 import 'package:band_names/models/emprendimiento.dart';
 import 'package:band_names/services/socket_service.dart';
@@ -21,32 +20,35 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  List<Emprendimiento> emprendimientos = [];
+
   @override
   void initState() {
     final socketService =Provider.of<SocketService>(context, listen: false); //Listen en false porque no quiero redibujar nada
-    
-    // socketService.socket.on('active-bands', _handleActiveBands);
+    socketService.socket.on('active-emprendimientos', _handleActiveBands);
     super.initState();
   }
 
-  // _handleActiveBands(dynamic payload) {
-  //   this.bands = (payload as List)
-  //   .map((band) => Band
-  //   .fromMap(band)).toList();
-  
-  //   setState(() {});
-  // }
+  _handleActiveBands(dynamic payload) {
+    // final addFormProvider = Provider.of<AddFormProvider>(context);
+    emprendimientos = (payload as List)
+    .map((emprendimiento) => Emprendimiento
+    .fromMap(emprendimiento)).toList();
+
+    setState(() {});
+  }
 
   @override
   void dispose() {
     final socketService =Provider.of<SocketService>(context, listen: false); //Listen en false porque no quiero redibujar nada
-    // socketService.socket.off('active-bands');
+    socketService.socket.off('active-emprendimientos');
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     final socketService =Provider.of<SocketService>(context); 
-     final addFormProvider = Provider.of<AddFormProvider>(context);
+    final addFormProvider = Provider.of<AddFormProvider>(context);
+    addFormProvider.emprendimientos = emprendimientos;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Emprendimientos', style: TextStyle(color:Colors.black87)),

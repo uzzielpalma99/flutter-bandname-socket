@@ -1,3 +1,4 @@
+import 'package:band_names/services/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +23,7 @@ class AddPage extends StatelessWidget {
     final nameCharacters = RegExp(r'^[a-zA-Z\- ]+$');
     final anyCharacters = RegExp(r'^.+');
     final addFormProvider = Provider.of<AddFormProvider>(context);
+    final socketService = Provider.of<SocketService>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text('ECM App'),
@@ -187,7 +189,7 @@ class AddPage extends StatelessWidget {
                       onPressed: () {
                         final isValid = addFormProvider.validateForm();
                           if (isValid) {
-                            agregarEmprendimiento(addFormProvider);
+                            agregarEmprendimiento(socketService, addFormProvider);
                             addFormProvider.clearInformation();
                             Navigator.pop(context);
                           }
@@ -204,7 +206,7 @@ class AddPage extends StatelessWidget {
     );
   }
 
-  void agregarEmprendimiento(AddFormProvider addFormProvider) {
+  void agregarEmprendimiento(SocketService socketService, AddFormProvider addFormProvider) {
     final nuevoEmprendimiento = Emprendimiento(
       id: uuid.v4(),
       emprendedor: addFormProvider.emprendedor, 
@@ -215,15 +217,7 @@ class AddPage extends StatelessWidget {
       );
 
     addFormProvider.emprendimientos.add(nuevoEmprendimiento);
-
+    socketService.emit('add-emprendimiento', {'id': nuevoEmprendimiento.id, 'emprendedor' : nuevoEmprendimiento.emprendedor, 'actividades': nuevoEmprendimiento.actividades, 'emprendimiento': nuevoEmprendimiento.emprendimiento, 'descripcion' : nuevoEmprendimiento.descripcion, 'localidad' : nuevoEmprendimiento.localidad});
   }
 
-  void addFakeOrderForCurrentCustomer() {
-    // final order = ShopOrder(
-    //   price: faker.randomGenerator.integer(500, min: 10)
-    //   );
-
-    // order.customer.target = _customer;
-    // _store.box<Emprendimiento>().put(order);
-  }
 }

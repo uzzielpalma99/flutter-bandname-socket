@@ -23,7 +23,6 @@ class AddFormProvider extends ChangeNotifier {
   bool validateForm() {
     return emprendimientoFormKey.currentState!.validate() ? true : false;
   }
-  
 
   void clearInformation()
   {
@@ -32,6 +31,17 @@ class AddFormProvider extends ChangeNotifier {
     emprendimiento = '';
     descripcion = '';
     localidad = '';
+    notifyListeners();
+  }
+
+  void removerEmprendimiento(String id) {
+
+    for (int i = 0; i < emprendimientos.length; i++) {
+      if (emprendimientos[i].id == id) {
+        emprendimientos.remove(emprendimientos[i]);
+      }
+    }
+
     notifyListeners();
   }
 
